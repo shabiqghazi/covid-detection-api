@@ -1,0 +1,6 @@
+uploads/
+.venv/
+venv/
+__pycache__
+neg/
+pos/
