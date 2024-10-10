@@ -10,6 +10,7 @@ import json
 import wave
 import subprocess
 # from audio_denoiser.AudioDenoiser import AudioDenoiser
+import pickle
 
 app = Flask(__name__)
 
@@ -83,7 +84,14 @@ def pcm_to_wav(pcm_file_path, wav_file_path, channels, sample_rate, sample_width
         wavfile.writeframes(pcm_data)
 
     print(f"File WAV berhasil dibuat: {wav_file_path}")
+def predict(input):
+    # Memuat model dari file
+    with open('knn_model.pkl', 'rb') as file:
+        loaded_model = pickle.load(file)
 
+    # Sekarang Anda bisa menggunakan loaded_model untuk prediksi
+    predictions = loaded_model.predict(input)
+    return predictions
 @app.route('/', methods=['GET'])
 def home():
     return "Hello World!"
@@ -128,20 +136,25 @@ def get_signal():
         response = check(series_path)
 
         if os.path.exists(filepath):
-            os.remove(filepath)
-            # os.remove(filepath + '.wav')
-            # os.remove(filepath + '_cough.txt')
+            os.remove(filename)
             print(f"File '{filepath}' berhasil dihapus.")
-
-        # return data
+        
         response = response.split(',')
-        return jsonify({
-            'url': response[0],
+        status = predict([[float(response[1]), float(response[2]), float(response[3])]])
+        status = "Positif" if int(status[0]) == 1 else "Negatif"
+        if response[4] == "Tidak Konklusif" :
+            status = "Tidak Konklusif"
+        elif response[4] != status :
+            status = "Tidak Konklusif"
+        # return data
+        data = {
+            'filename': filename,
             'dimension': response[1],
             'size': response[2],
             'dispersi': response[3],
-            'status': response[4],
-        })
+            'status': status,
+        }
+        return data
 
     return 'Invalid file type! Only .mp3, .wav, .ogg are allowed.'
 
