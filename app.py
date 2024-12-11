@@ -142,11 +142,10 @@ def get_signal():
         response = response.split(',')
         status = predict([[float(response[1]), float(response[2]), float(response[3])]])
         status = "Positif" if int(status[0]) == 1 else "Negatif"
-        if response[4] == "Tidak Konklusif" :
-            status = "Tidak Konklusif"
-        elif response[4] != status :
-            status = "Tidak Konklusif"
-        # return data
+        # if response[4].strip() == "Tidak Konklusif" :
+        #     status = "Tidak Konklusif"
+        # elif response[4].strip() != status :
+        #     status = "Tidak Konklusif"
         data = {
             'filename': filename,
             'dimension': response[1],
